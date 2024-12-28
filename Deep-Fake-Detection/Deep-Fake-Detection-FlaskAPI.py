@@ -167,11 +167,19 @@ def detect_deepfake():
         # Perform inference
         with torch.no_grad():
             outputs = model({'image': image_tensor})
+            # Get predictions
+            probabilities = torch.softmax(outputs, dim=1)
+            prediction = torch.argmax(probabilities).item()
+            confidence = probabilities.max().item()
         
-        # Get predictions
-        probabilities = torch.softmax(outputs, dim=1)
-        prediction = torch.argmax(probabilities).item()
-        confidence = probabilities.max().item()
+        # Clear CUDA cache if using GPU
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
+        # Explicitly clear variables
+        del image_tensor
+        del outputs
+        del probabilities
         
         # Prepare response
         result = {
@@ -184,6 +192,10 @@ def detect_deepfake():
     
     except Exception as e:
         return jsonify({'error': str(e), 'status': 'error'}), 500
+    finally:
+        # Ensure garbage collection runs
+        import gc
+        gc.collect()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
