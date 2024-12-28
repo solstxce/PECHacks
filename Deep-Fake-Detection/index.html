@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DeepFake Detection</title>
+    <style>
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload Image for DeepFake Detection</h2>
+    <form id="uploadForm">
+        <input type="file" id="imageInput" accept="image/*" required>
+        <button type="submit" id="submitBtn">Detect</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Disable form and show loading state
+            form.classList.add('loading');
+            submitBtn.disabled = true;
+            resultDiv.innerHTML = 'Processing...';
+
+            const formData = new FormData();
+            formData.append('image', document.getElementById('imageInput').files[0]);
+
+            try {
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <p>Prediction: ${data.prediction}</p>
+                    <p>Confidence: ${(data.confidence * 100).toFixed(2)}%</p>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `Error processing image: ${error.message}`;
+            } finally {
+                // Re-enable form
+                form.classList.remove('loading');
+                submitBtn.disabled = false;
+                
+                // Reset file input
+                document.getElementById('imageInput').value = '';
+            }
+        });
+    </script>
+</body>
+</html> 
