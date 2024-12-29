@@ -1,3 +1,6 @@
 [submodule "ExtensionToxmas"]
 	path = ExtensionToxmas
 	url = https://github.com/solstxce/ExtensionToxmas/
+[submodule "Toxmas-WebUI"]
+	path = Toxmas-WebUI
+	url = https://github.com/solstxce/Toxmas-WebUI
